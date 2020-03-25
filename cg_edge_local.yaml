@@ -1,0 +1,73 @@
+#cloud-config
+ 
+ssh_authorized_keys:
+- ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvuI0ak24Z/Kldjmh+ETI7mdOjmDLH7HB/i09pY+yde+am5ukMPWtB7zeuE1f/Ot0hOFqE84vaGBdV8ln3LI57M0TZCgSCnniq/GHWuV767NHlJsVc9FYjvZOvZcTeYKtuFPZKBtgf+xQrZVUOQHE0QUKkzGsPNlroE3EFZYluHYKSYEI9YwPHTOXwUzB5BuJFd28VcY/C7nvspmrBoLMxEedw2RAn/479YKDnHz/l0SRKcY3TuO2IE5NT6njdOL4ng8SAbSlXjELnT7qAaFvyxVV1zfVGaJD801Xt6EiQ2LWPEwVc3e5GsCkCgWyBb6HLkMyR0VLZzM7QLrXJgcC/ dev@dev
+ 
+system:
+  hostname: CloudGuardEdge
+  domainname: labnet.com
+  management_mode: local
+  local_management:
+    identity_awareness: false
+    app_control: true
+    anti_virus: true
+    anti_bot: true
+    ips: true
+    threat_emulation: false
+  dns1: 63.35.50.221
+  dns2: 63.35.51.205
+  ntp1:
+    address: ntp.checkpoint.com
+  ntp2:
+    address: ntp2.checkpoint.com
+  
+vpn:
+  sites:
+    - peer_name: VPNPeer1
+      peer_address: 1.2.3.4
+      peer_encryption_domain_network: 192.168.70.0
+      peer_encryption_domain_subnet: 255.255.255.0
+      peer_shared_secret: supersecretkey
+    - peer_name: VPNPeer2
+      peer_address: 4.5.6.7
+      peer_encryption_domain_network: 192.168.80.0
+      peer_encryption_domain_subnet: 255.255.255.0
+      peer_shared_secret: supersecretkey2
+  
+runcmd:
+ - 'touch /home/admin/runcmd'
+ 
+clishcmd:
+ - set message banner msgvalue "Welcome to Check Point CloudGuard Edge" on
+ - set ui-settings use-custom-webui-logo true
+ - set ui-settings custom-webui-logo-url https://www.telstra.com.au/
+ 
+write_files:
+  - path: /opt/fw1/conf/custom_ui_logo.png
+    permissions: '0664'
+    owner: admin:root
+    encoding: b64
+    content: |
+        iVBORw0KGgoAAAANSUhEUgAAACMAAAAoCAYAAAB0HkOaAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+        AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAA
+        B3RJTUUH5AEXECYL+YVMfgAABCNJREFUWMO92F+IVVUUx/HPOfPfcRxFDc0ky9I0MOgPESUElhT2
+        UFkpPZT9gZDqqZfoLYjoJSIfDCqwXlKhiKRARigirCB6SCvI6K+kYjUzzR0cnbn3nB72ud6Z8Z5z
+        7pTjDy6Xe88653z32muvtdeOFGnrXujBdtyNLjNThDj7jib97siup9l3jAPtJSBwL17IoGZT++IS
+        gxibLgDIOA6VwfRj9SyDwD84UgazFMsuAMwJHC2DuRwLLgDMTxhsDtMI3rXonGWQMbyP8fYSw6N4
+        E7Wc6x24CxcVPGMU+zAiLO3JquGzDOaci5luzuyS7Fnf53nvEnyCKwpgvsEG/G3PlsKRNzwzMDL5
+        v3nozX6fQkVbPC5Nua1v8v2XYkmJd3/LvFKqdgPDQjrRizuxGWsyIKjgD7XkW3xhYOQrHPP2QKJW
+        uwpzS97xIyZagwkgS/AStmqe8tdloBP4BQMevWO3XfuvVa2VveNIKyAZjG48j4dbsO/AKqwyXn3Q
+        gr7EySGiKM9+TFi2yuKlDnMr7m+VHuHlp8f7nT5TZjksrMiWFAvun3liGx1LjI1HBV6B4/hzJjAz
+        rz0RhkcT1VpUYvmrsABahilLfOcqTVODFZI0KrE7Io6rxkqn8yzMiRnDVJPEcCVShBJFLJ4/4p2d
+        PHVPyzCHhFTbmkLwpipjxV5pb+P61dt9/OE90nRyUi2EOYjBGXmmcipxejzODd40pbOdvjnL1ZKd
+        2ExUChQLtePr1j2D4dFUtVa8/ZjTneruIE2XYAfpJhQCxUIlfFd+ZZ4+6tRQSfCm6OsJUxV0MV7F
+        TUVA9dF9JMROuapJami0JHgxr5d4ivNW4hVclgdUtz6O11EtBAnBmxgdi0vt+nubbVBuFEpPb7Pb
+        YhvrxdleYW9SrMqptDB4oaONuT3R2a5oqrbgoWbemTzCIbyIk/kjVg/egnhJ6eqktzvPohPP4Orp
+        QAGm4Z1P8bK86WoleGFOF10dAay5VuJp07J/wzMBKMVr2N30ERO11GAlkqaafpLs5UsXpjpKq8x9
+        QgwxEMpXszsqeE5YjhumXKklqbk9iWWLJpqvpojF/bG1K2IRch0DFgp7qC9Ja9nd09SYwzXYdZa+
+        AVRcOtriSCQqAanrKG7HDzbOy8kWDaB1QqtyQ0uPnrlSPIE3mLqaGmoE9CE8IvQ2s6FI6IuifJip
+        QN9hGz4wk+reuq6UJcHiTNoA+hmPY4fQR51PzZcduZQ1/gEoQP2FZ/FkBne+VG9dW4CZ6qUzRG8J
+        R2p7hFbk/+p32T65dZg6UJTCYTwmBPfnygpsvlIMCCdXynb3+Wos/0WZp7bhOqEpbFUH8QCO5eeZ
+        /wY1H+uFA8n1WC7/bOcMDgiZ/jCcH5i69o/UJ70dK3CL0K1eI5SWLuE04jDeE85khuog8C/f2EJg
+        CSQQcgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMC0wMS0yM1QxNjozODoxMS0wNTowMBoPwsQAAAAl
+        dEVYdGRhdGU6bW9kaWZ5ADIwMjAtMDEtMjNUMTY6Mzg6MTEtMDU6MDBrUnp4AAAAAElFTkSuQmCC

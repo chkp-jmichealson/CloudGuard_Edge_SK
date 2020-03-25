@@ -1,0 +1,304 @@
+<h2>Overview</h2>
+<p>This article describes how cloud-init automation within the CloudGuard Edge image can be
+   leveraged to bootstrap a virtual machine built to run on the KVM hypervisor by various platforms. The bootstrap includes multiple methods of user-data input as well as user-data
+  formats.</p>
+<h2>Metadata Input Methods</h2>
+<h3>Config Drive</h3>
+<p>The most common method of providing metadata is a config drive. A config drive is a predefined file structure of VM
+  configuration information that is contained in a specially labeled ISO and then attached at VM creation time. Upon
+  first boot, the OS starts a bootstrapping service that searches for this mounted ISO via a <strong>blkid label</strong>
+  and\or <strong>filesystem type</strong> and then reads the metadata from the file structure. It is possible to input
+  basic VM meta information or complex multi-part scripts, service provider logos and more via this method.
+  <br /><br />While Check Point references the standards of cloud-init, some variations may exist. The Check Point image
+  with this updated bootstrapping has a naming convention that distinguishes the image automation within the image
+  (openstack, generic).</p>
+<h3>HTTP metadata service</h3>
+<p>Virtual machine information may also be polled from an HTTP metadata service within OpenStack KVM platform providers.
+  Be aware that not all OpenStack or KVM operators enable this service. The data available via the HTTP meta-service is
+  the same as what is provided via config-drive (vendor, network, meta, and user). The CG IaaS bootstrap service shows
+  preference to a mounted config-drive at first boot; when an attached config-drive is not detected, the bootstrap
+  service will attempt to poll the http service for the configuration data. One benefit of HTTP metadata vs. config
+  drive is that it is dynamic, presenting network interface changes to the VM post deployment. Conversely, config drive
+  data is only populated by the platform at VM instantiation. The CG Edge image <strong>does not</strong> consume HTTP
+  metadata service today.
+  The information in this section is provided for reference.</p>
+<h2>Requirements for generating config-drive ISO</h2>
+<h3>Check Point OpenStack Labeled QCOW Image Requirements</h3>
+<ol type="1">
+  <li>ISO label is set as "config-2"</li>
+  <li>The file structure for an OpenStack deployment has the following requirements:
+    <ol type="a">
+      <li>Check Point does not utilize this file.</li>
+    </ol>
+    <ol type="a">
+      <li>May specify DHCP or static interface configurations per interface.</li>
+      <li>If configured as DHCP, the bootstrapping automation polls for a DHCP provided address on specified interfaces,
+        consumes that DHCP address, and statically assigns it to the interface.</li>
+    </ol>
+    <ol type="a">
+      <li>SSH Key</li>
+      <li>Virtual machine name is provided by the platform. This VM name is consumed as the OS hostname unless a
+        hostname is specified in user_data.</li>
+    </ol>
+    <ol type="a">
+      <li>16k file limit</li>
+      <li>Description of additional data provided in <a href="#yaml"> user_data</a> section.</li>
+    </ol>
+  </li>
+  <ol type="i">
+    <li>The configuration files (vendor, network, meta, and user) must be placed in the ISO /openstack/latest/*&rdquo;
+      directory by the platform.</li>
+    <li>vendor_data.json</li>
+    <li>network_data.json</li>
+    <li>meta_data.json</li>
+    <li>user_data</li>
+  </ol>
+</ol>
+<h3>Check Point Generic Labeled QCOW Image Requirements</h3>
+<ol type="1">
+  <li>ISO must be type &ldquo;ISO9660&rdquo;</li>
+  <li>The ISO file structure has the following requirements:</li>
+  <ol type="i">
+    <li>The <strong>user_data</strong> file can be placed anywhere within the ISO (Check Point recommends the root
+      directory).</li>
+    <li>16k file limit</li>
+    <li>Description of additional data provided in the user_data section.</li>
+  </ol>
+  <li>Generic images DHCP note</li>
+  <ol type="i">
+    <li>Generic images rely on interface addressing/configuration to be provided in the user_data file.</li>
+    <li>If no interface data is provided, the on-boarding service will attempt to configure eth0 with a static IP,
+      obtained via DHCP.&nbsp;</li>
+  </ol>
+</ol>
+<h3>Check Point user_data Customization Formats</h3>
+<ol type="1">
+  <li>This section applies to both OpenStack and Generic images.</li>
+  <li>User_data may be provided via HTTP metadata service or config drive; not all operators enable platform HTTP
+    metadata services.</li>
+  <li>Config Drive ISO file structure has the following options:</li>
+  <ol type="i">
+    <li>The Check Point bootstrapping service will parse user_data and determine the format of the scripts to parse
+      automatically.</li>
+    <li>user_data has no format requirement besides properly following the convention of the chosen file format.</li>
+    <li>The order of operation for the Check Point bootstrapping service (also known as &ldquo;Just deplOy
+      Everything&rdquo; ) is MIME, cloud-config, and bash.</li>
+    <li>In the event that MIME or cloud-config are not detected, the user_data is processed as a bash script.</li>
+    <li>The user_data file may be presented as cloud-config in a <a href="#yaml">yaml</a> format.</li>
+    <li>user_data may be presented as <a href="#bash">bash</a> format.</li>
+    <li>user_data may be presented as multi-part mime format.</li>
+    <li>This method supports text/cloud-config and text/x-shellscript.</li>
+  </ol>
+  <ol>
+    <ol type="a">
+      <li>An example of when to use multi-part mime is terraform inputs. See this link.</li>
+      <li>For complex configurations using a mixture of cloud-config and bash it is suggested to utilize multi-part
+        mime.</li>
+    </ol>
+  </ol>
+</ol>
+<br>
+<h2>Examples</h2>
+<h3 id="yaml">Cloud-config user_data gateway yaml</h3>
+<p>The minimum group of settings required for a proper cloud-config Gateway deployment include:</p>
+<ul>
+  <li>blink_config</li>
+  <li>ssh_authorized_keys</li>
+</ul>
+<p>
+  <blockquote>
+    <pre>
+      <code>
+    #Example file. Removing a stanza will result in system defaults for that section.<br />
+    #cloud-config<br />
+    blink_config:
+    &nbsp; configure: "true"
+    &nbsp; gateway_cluster_member: "false"
+    &nbsp; download_info: "true"
+    &nbsp; upload_info: "true"
+    &nbsp; ftw_sic_key: "vpn123"<br />
+    ssh_authorized_keys:
+    - ssh-rsa AAAAB3NzV1zfVGaJD801Xt6EiQ2LWPEwVc3e5GsCkCgWyBb6HLkMyR0VLZzM7QLrXJgcC/ dev@dev
+    - ssh-rsa /8tiDGO2Ngq5O59igrKM/Q8X+yFKakISNbOg+iV8bZsPdLKfIjpb1HELFKe+eFijmbqzT replace@me<br />
+    system:
+    &nbsp; hostname: CloudGuard
+    &nbsp; domainname: labnet.com
+    &nbsp; dns1: 1.1.1.1
+    &nbsp; dns2: 8.8.8.8
+    &nbsp; dns3: 4.2.2.2
+    &nbsp; ntp1:
+    &nbsp;&nbsp;&nbsp; address: ntp.checkpoint.com
+    &nbsp;&nbsp;&nbsp; version: 4
+    &nbsp; ntp2:
+    &nbsp;&nbsp;&nbsp; address: ntp2.checkpoint.com
+    &nbsp;&nbsp;&nbsp; version: 4<br />
+    # Please configure interfaces per OpenStack or Generic image instructions !!!!!<br />
+    interfaces:
+    &nbsp; - name: eth0
+    &nbsp;&nbsp;&nbsp; ipv4-address: 192.168.1.35
+    &nbsp;&nbsp;&nbsp; subnet-length: 24
+    &nbsp; - name: eth1
+    &nbsp;&nbsp;&nbsp; ipv4-address: DHCP<br />
+    routing:
+    &nbsp; static:
+    &nbsp;&nbsp;&nbsp; - dst: 4.2.2.4/32
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nexthop: 1.0.1.1
+    &nbsp;&nbsp;&nbsp; - dst: 1.1.1.1/32
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nexthop: 10.0.2.1
+    &nbsp;&nbsp;&nbsp; - dst: 4.3.2.0/24
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nexthop: eth0
+    &nbsp;&nbsp;&nbsp; - dst: 4.3.2.8/32
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nexthop: blackhole<br />
+    cpusers:
+    - name: admin
+    &nbsp;&nbsp;shell: /bin/bash
+    &nbsp;&nbsp;password-hash: 
+    - name: expert
+    &nbsp;&nbsp;password-hash: $1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0
+    - name: john
+    &nbsp;&nbsp;password-hash: $1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0
+    &nbsp;&nbsp;shell: /bin/cli.sh
+    &nbsp;&nbsp;ssh_authorized_keys:
+    &nbsp;&nbsp;&nbsp; - ssh-rsa $1$6CogNXN/$G0dWAbB0/KCY.HEzuLa8uexamplekey123 dev@dev
+    - name: joe
+    &nbsp;&nbsp;password-hash: $1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0
+    &nbsp;&nbsp;shell: /bin/bash
+    &nbsp;&nbsp;ssh_authorized_keys:
+    &nbsp;&nbsp;&nbsp; - ssh-rsa $1$6CogNXN/$G0dWAbB0/KCY.HEzuLa8uexamplekey123 replace@me<br />
+    clishcmd:
+    - 'set as 6408.45314'
+    - 'set as 6408.45314'
+    - 'set bgp external remote-as 6408.45312 on'
+    - 'set bgp external remote-as 6408.45312 local-address 100.100.1.3 on'
+    - 'set bgp external remote-as 6408.45312 description INSIDE'
+    - 'set bgp external remote-as 6408.45312 peer 100.100.1.1 on'
+    - 'set bgp external remote-as 6408.45312 peer 100.100.1.1 ping on'
+    - 'set bgp external remote-as 6408.45313 on'
+    - 'set bgp external remote-as 6408.45313 local-address 100.100.1.13 on'
+    - 'set bgp external remote-as 6408.45313 description OUTSIDE'
+    - 'set bgp external remote-as 6408.45313 peer 100.100.1.11 on'
+    - 'set bgp external remote-as 6408.45313 peer 100.100.1.11 ping on'<br />
+    write_files:
+    - path: /home/admin/write_files
+    &nbsp;&nbsp;permissions: '0644'
+    &nbsp;&nbsp;owner: admin:root
+    &nbsp;&nbsp;content: |
+    &nbsp;&nbsp;&nbsp;&nbsp;My file content<br />
+    - path: /home/admin/base64_write_files.jpeg
+    &nbsp;&nbsp;permissions: '0644'
+    &nbsp;&nbsp;owner: admin:root
+    &nbsp;&nbsp;encoding: b64
+    &nbsp;&nbsp;content: |
+    &nbsp;&nbsp;&nbsp;&nbsp;/9j/4AAQSkZJRgABAQIAJgAmAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB
+    &nbsp;&nbsp;&nbsp;&nbsp;AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEB
+    &nbsp;&nbsp;&nbsp;&nbsp;5peaMhIa91kjG_THIS_IS_A_BASE_64_ENCRYPTED_JPG_Zm3I7ihjxrlw0pLNDneVDlrVc0pNFW
+    &nbsp;&nbsp;&nbsp;&nbsp;hxtDiqSmnDXRV_THIS_IS_JUST_AN_EXAMPLE_NOT_REQUIRED_sS+Mus+8s+7P8ivNyL+FY/l5P
+    &nbsp;&nbsp;&nbsp;&nbsp;+YrxlNn4ir7yr/NGYYf7Uv8Asf0eHxkzvYj+bHnzwIZF/fGh/wA26/6WJ4ylyf6X+lvm7GDH1g/w
+    &nbsp;&nbsp;&nbsp;&nbsp;K4D/ACq4f9GuHjMvP//Z
+      </code></pre>
+  </blockquote>
+</p>
+<br>
+<h3>Cloud-config user_data Security Management Server yaml</h3>
+<p>As of this writing, SMS Generic and OpenStack images are NOT blink enabled. These images utilize the same deployment
+  mechanism Check Point has embedded for some time. The config_system stanza will accept any input that is referenced in
+  <a href="https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&amp;solutionid=sk69701"
+    target="_blank" rel="noopener">sk69701</a>.</p>
+<p>
+  <blockquote>
+    <pre>
+      <code>
+  # Non-Blink All-In-One (SMS + GW) or SMS images only!!!!! <br />
+  #cloud-config<br />
+  config_system:
+  &nbsp; configure: "true"
+  &nbsp; hostname: SMS
+  &nbsp; mgmt_admin_name: "admin"
+  &nbsp; mgmt_admin_passwd: "vpn123"
+  &nbsp; mgmt_gui_clients_radio: any
+  &nbsp; install_security_managment: "true"
+  &nbsp; install_security_gw: "false"
+  &nbsp; install_mgmt_primary: "true"
+  &nbsp; install_mgmt_secondary: "false"
+  &nbsp; download_info: "true"
+  &nbsp; upload_info: "true"
+  &nbsp; mgmt_gui_clients_radio: any
+  &nbsp; primary: 1.1.1.1
+  &nbsp; secondary: 8.8.8.8
+  &nbsp; tertiary: 4.2.2.1
+  &nbsp; ntp_primary: ntp.checkpoint.com
+  &nbsp; ntp_primary_version: 4
+  &nbsp; ntp_secondary: ntp2.checkpoint.com
+  &nbsp; ntp_secondary_version: 4
+</code>
+</pre>
+  </blockquote>
+</p>
+<br>
+<h4 id="bash">Blink (bash) Gateway user_data</h4>
+<p>While <a
+    href="https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&amp;solutionid=sk120193"
+    target="_blank" rel="noopener">sk120193</a> describes blink operations in detail, the blink function within the
+  Generic and OpenStack image only accept the <strong>following example.</strong></p>
+
+<blockquote>
+  <pre>
+    <code>
+  #!/bin/bash
+  adminHash='$1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0'
+  sicKey="vpn123"
+  allowUpload="true"
+  allowDownload="true"
+  clusterMember="false"
+  #
+  echo "begin blink" &gt;&gt; /var/log/run-cloud-user-data 
+  blink_config -s
+  "gateway_cluster_member=${clusterMember}&amp;ftw_sic_key=${sicKey}&amp;upload_info=${allowUpload}&amp;download_info=${allowDownload}"
+  echo "end blink" &gt;&gt; /var/log/run-cloud-user-data 
+  #
+</code>
+</pre>
+</blockquote>
+
+
+<p>Adding simple clish commands to this same user_data example enables more complex configurations:</p>
+<p>
+  <blockquote>
+    <pre>
+      <code>
+  #!/bin/bash
+  adminHash='$1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0'
+  sicKey="vpn123"
+  allowUpload="true"
+  allowDownload="true"
+  clusterMember="false"
+  #
+  echo "begin blink" &gt;&gt; /var/log/run-cloud-user-data 
+  blink_config -s
+  "gateway_cluster_member=${clusterMember}&amp;ftw_sic_key=${sicKey}&amp;upload_info=${allowUpload}&amp;download_info=${allowDownload}"
+  echo "end blink" &gt;&gt; /var/log/run-cloud-user-data 
+  #
+  clish -c "lock database override"
+  #clish -c "set user admin shell /bin/bash" -s
+  clish -c "set user admin password-hash ${adminHash}" -s
+  clish -c "set interface eth0 ipv4-address 120.120.120.113 mask-length 24" -s
+  clish -c "set interface eth0 state on" -s
+  clish -c "set static-route default nexthop gateway address 120.120.120.29 priority 1 on" -s
+  clish -c "set hostname CP_Hostname" -s
+  echo "end config" &gt;&gt; /var/log/run-cloud-user-data 
+  </code>
+    </pre>
+  </blockquote>
+</p>
+<br>
+<h3 id="iso">ISO Creation</h3>
+<p>There are various tools to create an ISO, genisofs, mkisofs and xorriso are the most common.</p>
+<p>
+  <ul>
+    <li>bash_prompt:&gt; genisoimage -output /tmp/myUserData-gw.iso -volid config-2 -joliet -r
+      ~/cloud-init/myUserData/openstack.gw/
+    <li>bash_prompt:&gt; mkisofs -r -V config-2 -o /tmp/myUserData-gw.iso /tmp/cloud-init/myUserData/openstack.gw/</li>
+    <li>bash_prompt:&gt; xorriso -as mkisofs -o /tmp/myUserData-gw.iso /tmp/cloud-init/myUserData/openstack.gw/</li>
+  </ul>
+</p>
+<br>
