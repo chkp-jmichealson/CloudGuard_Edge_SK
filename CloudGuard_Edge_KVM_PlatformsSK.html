@@ -141,114 +141,552 @@
 <br>
 
 <h2>Examples</h2>
-<h3 id="yaml">Cloud-config user_data gateway yaml</h3>
+<h3 id="yaml">CG Edge VNF cloud-config user_data yaml</h3>
 <p>The generic CG Edge image has no settings for a cloud-config gateway deployment. However, <em>not providing any user data </em> will result in a VNF with a default configutaion and require the first-time-wizard to be ran manually.</p>
 <p>
+
+
+
   <blockquote>
     <pre>
     <code>
   ###Example file. Removing a stanza will result in system defaults for that section.<br />
   #cloud-config
 
-  ssh_authorized_keys:
-  - ssh-rsa AA/yxVV1zfVGaJD801Xt6EiQ2LWPEwVc3e5GsCkCgWyBb6HLkMyR0VLZzM7QLrXJgcC/ dev@dev
-    
   system:
-  &nbsp;hostname: CloudGuardEdge
-  &nbsp;domainname: labnet.com
-  &nbsp;management_mode: central
-  &nbsp;central_managent:
-  &nbsp;&nbsp;address: 10.200.1.3
-  &nbsp;&nbsp;gateway_sic_key: vpn123
+   hostname: CloudGuardEdge
+   domainname: labnet.com
+   management_mode: central
+   central_management:
+    address: 10.200.1.3
+    gateway_sic_key: vpn123
   ### DNS set in system area is redundant when implemented on WAN interface.
-  &nbsp;dns1: 1.1.1.1
-  &nbsp;dns2: 8.8.8.8
-  &nbsp;dns3: 4.2.2.2
-  &nbsp;ntp1:
-  &nbsp;&nbsp;address: ntp.checkpoint.com
-  &nbsp;ntp2:
-  &nbsp;&nbsp;address: ntp2.checkpoint.com
-    
-  cpusers:
-  &nbsp;- name: admin
-  &nbsp;&nbsp;shell: /bin/bash
-  &nbsp;&nbsp;password-hash: $1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0
-  &nbsp;- name: joe
-  &nbsp;&nbsp;shell: /etc/cli.sh
-  &nbsp;&nbsp;password-hash: $1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0
-  &nbsp;&nbsp;permission: read-write
+   dns1: 1.1.1.1
+   dns2: 8.8.8.8
+   dns3: 4.2.2.2
+   ntp1:
+    address: ntp.checkpoint.com
+   ntp2:
+    address: ntp2.checkpoint.com
 
-  ### Static WAN/Management interface example
-  interfaces:
-  - name: WAN
-  &nbsp;ipv4-address: 10.87.0.105
-  &nbsp;subnet-mask: 255.255.255.0
-  &nbsp;dns1: 10.56.0.1
-  &nbsp;dns2: 8.8.8.8
-  &nbsp;default-gw: 10.87.0.200
-  &nbsp;mgmt: true
-  - name: br0
-  &nbsp;ipv4-address: 172.34.150.100
-  &nbsp;subnet-mask: 255.255.255.248
-  - name: DMZ
-  &nbsp;bridge: br0
-  - name: LAN1
-  &nbsp;bridge: br0
-
-  # DHCP WAN/Management interface example
-  interfaces:
-  - name: WAN
-  &nbsp;mgmt: true
-  &nbsp;ipv4-address: dhcp
-  - name: br0
-  &nbsp;ipv4-address: 172.34.150.100
-  &nbsp;subnet-mask: 255.255.255.248
-  - name: DMZ
-  &nbsp;bridge: br0
-  - name: LAN1
-  &nbsp;bridge: br0
-
-  vpn:
-  sites:
-  &nbsp;&nbsp;- peer_name: VPNPeer1
-  &nbsp;&nbsp;&nbsp;peer_address: 1.2.3.4
-  &nbsp;&nbsp;&nbsp;peer_encryption_domain_network: 192.168.70.0
-  &nbsp;&nbsp;&nbsp;peer_encryption_domain_subnet: 255.255.255.0
-  &nbsp;&nbsp;&nbsp;peer_shared_secret: supersecretkey1
-  &nbsp;&nbsp;- peer_name: VPNPeer2
-  &nbsp;&nbsp;&nbsp;peer_address: 4.5.6.7
-  &nbsp;&nbsp;&nbsp;peer_encryption_domain_network: 192.168.80.0
-  &nbsp;&nbsp;&nbsp;peer_encryption_domain_subnet: 255.255.255.0
-  &nbsp;&nbsp;&nbsp;peer_shared_secret: supersecretkey2
+  ssh_authorized_keys:
+  - ssh-rsa AA/yxVV1zfVGaJD801Xt6EiQ2LWPEwVc3e5GsCkCgWyBb6HLkMyR0VLZzM7QLrXJgcC/ replace@me
 
   cpusers:
   - name: admin
-  &nbsp;shell: /bin/bash
-  &nbsp;password-hash: $1$t00e9wFc$R/8X5130WvmJbgdhj7D/T/
+    shell: /bin/bash
+    password-hash: $1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0
+  - name: joe
+    shell: /etc/cli.sh
+    password-hash: $1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0
+    permission: read-write
+
+  ### Static WAN/Mgmt interface example
+  interfaces:
+  - name: WAN
+    ipv4-address: 10.87.0.105
+    subnet-mask: 255.255.255.0
+    dns1: 10.56.0.1
+    dns2: 8.8.8.8
+    default-gw: 10.87.0.200
+    mgmt: true
+  - name: br0
+    ipv4-address: 172.34.150.100
+    subnet-mask: 255.255.255.248
+  - name: DMZ
+    bridge: br0
+  - name: LAN1
+    bridge: br0
+
+  ### DHCP WAN/Management interface example
+  interfaces:
+  - name: WAN
+    mgmt: true
+    ipv4-address: dhcp
+  - name: br0
+    ipv4-address: 172.34.150.100
+    subnet-mask: 255.255.255.248
+  - name: DMZ
+    bridge: br0
+  - name: LAN1
+    bridge: br0
+
+  vpn:
+    sites:
+    - peer_name: VPNPeer1
+      peer_address: 1.2.3.4
+      peer_encryption_domain_network: 192.168.70.0
+      peer_encryption_domain_subnet: 255.255.255.0
+      peer_shared_secret: supersecretkey1
+    - peer_name: VPNPeer2
+      peer_address: 4.5.6.7
+      peer_encryption_domain_network: 192.168.80.0
+      peer_encryption_domain_subnet: 255.255.255.0
+      peer_shared_secret: supersecretkey2
+
+  cpusers:
+  - name: admin
+    shell: /bin/bash
+    password-hash: $1$t00e9wFc$R/8X5130WvmJbgdhj7D/T/
   - name: john
-  &nbsp;shell: /etc/cli.sh
-  &nbsp;password-hash: $1$t00e9wFc$R/8X5130WvmJbgdhj7D/T/
-  &nbsp;permission: read-write
+    shell: /etc/cli.sh
+    password-hash: $1$t00e9wFc$R/8X5130WvmJbgdhj7D/T/
+    permission: read-write
 
   clishcmd:
   - set message banner msgvalue "Welcome to Check Point CloudGuard Edge" on
   - set ui-settings use-custom-webui-logo true
   - set ui-settings custom-webui-logo-url https://www.customer.com/
   write_files:
-  &nbsp;- path: /opt/fw1/conf/custom_ui_logo.png
-  &nbsp;&nbsp;permissions: '0664'
-  &nbsp;&nbsp;owner: admin:root
-  &nbsp;&nbsp;encoding: b64
-  &nbsp;&nbsp;content: |
-          AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEB
-          5peaMhIa91kjG_THIS_IS_A_BASE_64_ENCRYPTED_JPG_Zm3I7ihjxrlw0pLNDneVDlrVc0pNFW
-          hxtDiqSmnDXRV_THIS_IS_JUST_AN_EXAMPLE_NOT_REQUIRED_sS+Mus+8s+7P8ivNyL+FY/l5P
-  &nbsp;&nbsp;&nbsp;&nbsp;+YrxlNn4ir7yr/NGYYf7Uv8Asf0eHxkzvYj+bHnzwIZF/fGh/wA26/6WJ4ylyf6X+lvm7GDH1g/w
-  &nbsp;&nbsp;&nbsp;&nbsp;K4D/ACq4f9GuHjMvP//Z+bHnzwIZF/fGh/wA26/6WJ4ylyf6X+lvm7GDH1g/wfGh/w8Asf0eHxkz
+  - path: /opt/fw1/conf/custom_ui_logo.png
+    permissions: '0664'
+    owner: admin:root
+    encoding: b64
+    content: |
+      AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEB
+      5peaMhIa91kjG_THIS_IS_A_BASE_64_ENCRYPTED_JPG_Zm3I7ihjxrlw0pLNDneVDlrVc0pNFW
+      hxtDiqSmnDXRV_THIS_IS_JUST_AN_EXAMPLE_NOT_REQUIRED_sS+Mus+8s+7P8ivNyL+FY/l5P
+      +YrxlNn4ir7yr/NGYYf7Uv8Asf0eHxkzvYj+bHnzwIZF/fGh/wA26/6WJ4ylyf6X+lvm7GDH1g/w
+      K4D/ACq4f9GuHjMvP//Z+bHnzwIZF/fGh/wA26/6WJ4ylyf6X+lvm7GDH1g/wfGh/w8Asf0eHxkz
           </code>
           </pre>
   </blockquote>
 </p>
+<br>
+<h4>Yaml Option Table</h4>
+
+<style type="text/css">
+  .tg  {border-collapse:collapse;border-spacing:0;border-color:#ccc;}
+  .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#fff;}
+  .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#f0f0f0;}
+  .tg .tg-baqh{text-align:center;vertical-align:top}
+  .tg .tg-buh4{background-color:#f9f9f9;text-align:left;vertical-align:top}
+  .tg .tg-0lax{text-align:left;vertical-align:top}
+  </style>
+  <table class="tg" style="undefined;table-layout: fixed; width: 1200px">
+  <colgroup>
+  <col style="width: 80px">
+  <col style="width: 100px">
+  <col style="width: 110px">
+  <col style="width: 110px">
+  <col style="width: 110px">
+  </colgroup>
+    <tr>
+      <th class="tg-baqh">Root Option</th>
+      <th class="tg-baqh">Option</th>
+      <th class="tg-baqh">Sub Option</th>
+      <th class="tg-baqh">Data</th>
+      <th class="tg-0lax">Note</th>
+    </tr>
+    <tr>
+      <td class="tg-0lax">system</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">hostname</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">domain_name</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">management_mode</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">local or central</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">local_management</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">identity_awareness</td>
+      <td class="tg-buh4">true or false</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">app_control</td>
+      <td class="tg-buh4">true or false</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">anti_virus</td>
+      <td class="tg-buh4">true or false</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">anti_bot</td>
+      <td class="tg-buh4">true or false</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">ips</td>
+      <td class="tg-buh4">true or false</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">threat_emulation</td>
+      <td class="tg-buh4">true or false</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">central_management</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">address</td>
+      <td class="tg-buh4">SMS IP address</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">gateway_sic_key</td>
+      <td class="tg-buh4">GW SIC key</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">dns1</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">DNS1 IP address</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">dns2</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">DNS2 IP address</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">dns3</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">DNS3 IP address</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">ntp1</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">address</td>
+      <td class="tg-buh4">NTP1 IP Address</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">ntp2</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">address</td>
+      <td class="tg-buh4">NTP2 IP Address</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax">ssh_authorized_keys</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">- ssh-rsa</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">admin user SSH public key 1</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">- ssh-rsa</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">admin user SSH public key 2</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax">cpusers</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">- name</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">admin</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">shell</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">/bin/bash or /etc/cli.sh</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">password-hash</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">password hash</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">- name</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">example</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">shell</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">/bin/bash or /etc/cli.sh</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">password-hash</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">password-hash</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax">interfaces</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">- name</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">br0, 1, 2, WAN, DMZ, LAN1, 2, 3, etc.</td>
+      <td class="tg-0lax">When set to brX creates a bridge group for later assignment</td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">ipv4-address</td>
+      <td class="tg-buh4">dhcp or IP Address</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">subnet-mask</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">dns1</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">dns2</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">default-gw</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">Sets default gateway IP address for WAN interface</td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">bridge</td>
+      <td class="tg-buh4">br0, 1, 2, etc</td>
+      <td class="tg-0lax">Assigns interface to bridge group</td>
+    </tr>
+    <tr>
+      <td class="tg-0lax">vpn</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">sites</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">- peer_name</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">vpn peer name</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">peer_address</td>
+      <td class="tg-buh4">vpn peer Ip address</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">peer_encryption_domain_network</td>
+      <td class="tg-buh4">vpn peer subnet</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">peer_encryption_domain_subnet</td>
+      <td class="tg-buh4">vpn peer subnet mask</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">peer_shared_secret</td>
+      <td class="tg-buh4">vpn peer shared secret</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax">clishcmd</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">This section enables corner cases, any valid clish command is allowed</td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4" colspan="3">- set message banner msgvalue "Welcome to Check Point CloudGuard Edge" on</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4" colspan="3">- set ui-settings use-custom-webui-logo true</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4" colspan="3">- set ui-settings custom-webui-logo-url https://www.example.com/</td>
+      <td class="tg-0lax"></td>
+    </tr>
+
+    <tr>
+      <td class="tg-0lax">write_files</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">This section enables logo and script upload</td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">- path:</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">/opt/fw1/conf/custom_ui_logo.png</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">permissions</td>
+      <td class="tg-buh4">file permission</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">owner</td>
+      <td class="tg-buh4">file owner</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">encoding</td>
+      <td class="tg-buh4">file encoding</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">content</td>
+      <td class="tg-buh4"> base64 encoded content</td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax">runcmd</td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax">This section enables corner cases</td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4">- 'touch /home/admin/runcmd'</td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+    <tr>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+      <td class="tg-buh4"></td>
+      <td class="tg-0lax"></td>
+    </tr>
+  </table>
 
 
 <br>
@@ -335,58 +773,4 @@ set bridge br1 add member LAN1:251
   <br>
 </p>
 
-<H1>Below this line be tigers</H1>
 
-<p>While <a
-    href="https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&amp;solutionid=sk120193"
-    target="_blank" rel="noopener">sk120193</a> describes blink operations in detail, the blink function within the
-  Generic and OpenStack image only accept the <strong>following example.</strong></p>
-<p>
-  <blockquote>
-    <pre>
-        <code>
-      #!/bin/bash
-      adminHash='$1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0'
-      sicKey="vpn123"
-      allowUpload="true"
-      allowDownload="true"
-      clusterMember="false"
-      #
-      echo "begin blink" &gt;&gt; /var/log/run-cloud-user-data 
-      blink_config -s
-      "gateway_cluster_member=${clusterMember}&amp;ftw_sic_key=${sicKey}&amp;upload_info=${allowUpload}&amp;download_info=${allowDownload}"
-      echo "end blink" &gt;&gt; /var/log/run-cloud-user-data 
-      #
-    </code>
-    </pre>
-  </blockquote>
-</p>
-<p>Adding simple clish commands to this same user_data example enables more complex configurations:</p>
-<p>
-  <blockquote>
-    <pre>
-        <code>
-    #!/bin/bash
-    adminHash='$1$Gz8EHpk6$L7YYYtIN6zThsBp0n6cAI0'
-    sicKey="vpn123"
-    allowUpload="true"
-    allowDownload="true"
-    clusterMember="false"
-    #
-    echo "begin blink" &gt;&gt; /var/log/run-cloud-user-data 
-    blink_config -s
-    "gateway_cluster_member=${clusterMember}&amp;ftw_sic_key=${sicKey}&amp;upload_info=${allowUpload}&amp;download_info=${allowDownload}"
-    echo "end blink" &gt;&gt; /var/log/run-cloud-user-data 
-    #
-    clish -c "lock database override"
-    #clish -c "set user admin shell /bin/bash" -s
-    clish -c "set user admin password-hash ${adminHash}" -s
-    clish -c "set interface eth0 ipv4-address 120.120.120.113 mask-length 24" -s
-    clish -c "set interface eth0 state on" -s
-    clish -c "set static-route default nexthop gateway address 120.120.120.29 priority 1 on" -s
-    clish -c "set hostname CP_Hostname" -s
-    echo "end config" &gt;&gt; /var/log/run-cloud-user-data 
-    </code>
-      </pre>
-  </blockquote>
-</p>
