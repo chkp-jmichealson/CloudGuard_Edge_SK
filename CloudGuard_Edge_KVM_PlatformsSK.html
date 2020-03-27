@@ -695,64 +695,64 @@
   <blockquote>
     <pre>
       <code>
-# Management interface 
+  # Management interface 
 
-add internet-connection interface WAN type static ipv4-address 10.100.0.5 subnet-mask 255.255.255.0 default-gw 10.100.0.1 conn-test-timeout 0 name Mgmt 
-OR  
-add internet-connection interface WAN type dhcp name Mgmt conn-test-timeout 0 
-THEN 
-set internet-connection Mgmt disable-nat on 
-set internet-connection Mgmt route-traffic-through-default-gateway false 
+  add internet-connection interface WAN type static ipv4-address 10.100.0.5 subnet-mask 255.255.255.0 default-gw 10.100.0.1 conn-test-timeout 0 name Mgmt 
+  OR  
+  add internet-connection interface WAN type dhcp name Mgmt conn-test-timeout 0 
+  THEN 
+  set internet-connection Mgmt disable-nat on 
+  set internet-connection Mgmt route-traffic-through-default-gateway false 
 
-# Internet Interfaces 
+  # Internet Interfaces 
 
-add internet-connection interface LAN4 type dhcp name Internet1 conn-test-timeout 0 
-add internet-connection interface LAN5 type dhcp name Internet2 conn-test-timeout 0 
-OR 
-add internet-connection interface LAN4 type static ipv4-address 10.100.0.7 subnet-mask 255.255.255.0 default-gw 10.100.0.1 conn-test-timeout 0 name Internet1  
-add internet-connection interface LAN5 type static ipv4-address 10.100.0.8 subnet-mask 255.255.255.0 default-gw 10.100.0.1 conn-test-timeout 0 name Internet2 
+  add internet-connection interface LAN4 type dhcp name Internet1 conn-test-timeout 0 
+  add internet-connection interface LAN5 type dhcp name Internet2 conn-test-timeout 0 
+  OR 
+  add internet-connection interface LAN4 type static ipv4-address 10.100.0.7 subnet-mask 255.255.255.0 default-gw 10.100.0.1 conn-test-timeout 0 name Internet1  
+  add internet-connection interface LAN5 type static ipv4-address 10.100.0.8 subnet-mask 255.255.255.0 default-gw 10.100.0.1 conn-test-timeout 0 name Internet2 
 
-# Globals 
-set property first-time-wizard off 
-set admin-access interfaces WAN access allow 
-set admin-access allowed-ipv4-addresses any 
-set security-management mode locally-managed 
-set antispoofing advanced-settings global-activation "false" 
-set dhcp server interface WAN disable 
-set dhcp server interface DMZ disable 
-set dhcp server interface LAN1 disable 
-set dhcp server interface LAN2 disable 
-set dhcp server interface LAN3 disable 
-set dhcp server interface LAN4 disable 
-set dhcp server interface LAN5 disable 
+  # Globals 
+  set property first-time-wizard off 
+  set admin-access interfaces WAN access allow 
+  set admin-access allowed-ipv4-addresses any 
+  set security-management mode locally-managed 
+  set antispoofing advanced-settings global-activation "false" 
+  set dhcp server interface WAN disable 
+  set dhcp server interface DMZ disable 
+  set dhcp server interface LAN1 disable 
+  set dhcp server interface LAN2 disable 
+  set dhcp server interface LAN3 disable 
+  set dhcp server interface LAN4 disable 
+  set dhcp server interface LAN5 disable 
 
-# DMZ Interface 
+  # DMZ Interface 
 
-add interface DMZ vlan 100 
-add interface DMZ vlan 101 
-add interface DMZ vlan 150 
-add interface DMZ vlan 151 
-set interface DMZ:100 ipv4-address 192.168.100.254 mask-length 24 
-set interface DMZ:101 ipv4-address 192.168.101.254 mask-length 24 
-add bridge name bro 
-set dhcp server interface br0 disable 
-set interface br0 ipv4-address 172.34.150.100 mask-length 24 
-set bridge br0 add member DMZ:150 
-set bridge br0 add member DMZ:151 
+  add interface DMZ vlan 100 
+  add interface DMZ vlan 101 
+  add interface DMZ vlan 150 
+  add interface DMZ vlan 151 
+  set interface DMZ:100 ipv4-address 192.168.100.254 mask-length 24 
+  set interface DMZ:101 ipv4-address 192.168.101.254 mask-length 24 
+  add bridge name bro 
+  set dhcp server interface br0 disable 
+  set interface br0 ipv4-address 172.34.150.100 mask-length 24 
+  set bridge br0 add member DMZ:150 
+  set bridge br0 add member DMZ:151 
 
-# LAN1 Interface as trunk
+  # LAN1 Interface as trunk
 
-add interface LAN1 vlan 200 
-add interface LAN1 vlan 201 
-add interface LAN1 vlan 250 
-add interface LAN1 vlan 251 
-set interface LAN1:200 ipv4-address 192.168.200.254 mask-length 24 
-set interface LAN1:201 ipv4-address 192.168.201.254 mask-length 24 
-add bridge name br1 
-set dhcp server interface br1 disable 
-set interface br1 ipv4-address 172.34.250.100 mask-length 24 
-set bridge br1 add member LAN1:250 
-set bridge br1 add member LAN1:251
+  add interface LAN1 vlan 200 
+  add interface LAN1 vlan 201 
+  add interface LAN1 vlan 250 
+  add interface LAN1 vlan 251 
+  set interface LAN1:200 ipv4-address 192.168.200.254 mask-length 24 
+  set interface LAN1:201 ipv4-address 192.168.201.254 mask-length 24 
+  add bridge name br1 
+  set dhcp server interface br1 disable 
+  set interface br1 ipv4-address 172.34.250.100 mask-length 24 
+  set bridge br1 add member LAN1:250 
+  set bridge br1 add member LAN1:251
 </code>
 </pre>
   </blockquote>
