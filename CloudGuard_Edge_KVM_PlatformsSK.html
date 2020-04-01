@@ -22,14 +22,14 @@
 <h3>HTTP metadata service</h3>
 <p>Virtual machine information may be polled from an HTTP metadata service within OpenStack KVM platform providers.
   Be aware that not all OpenStack or KVM operators enable this service. The data available via the HTTP meta-service is
-  the same as what is provided via config drive (vendor, network, meta, and user data). The CG IaaS bootstrap service
+  the same as what is provided via config drive (vendor, network, meta, and user data). The CloudGuard Edge bootstrap service
   shows
   preference to a mounted config drive at first boot; when an attached config drive is not detected, the bootstrap
   service will attempt to poll the http service for the configuration data. One benefit of HTTP metadata vs. config
   drive is
   that it is dynamic, presenting network interface changes to the VM post deployment. Conversely, config drive
   data is only populated by the platform at VM instantiation.<br>
-  The this section is provided for <em>information purposes only.</em> The CG Edge bootstrap service <strong>does
+  This section is provided for <em>information purposes only.</em> The CG Edge bootstrap service <strong>does
     not</strong> consume HTTP metadata
   service data. </p><br>
 
@@ -78,10 +78,10 @@
 </ol>
 <br>
 
-<h3>CloudGuard Edge VNF Interface Requirements</h3>
+<h3>CloudGuard Edge Interface Requirements</h3>
 <p>
   <ol type="1">
-    <li>CG Edge VNF images reqire a minimum of <strong>three</strong> interfaces:</li>
+    <li>CG Edge images reqire a minimum of <strong>three</strong> interfaces:</li>
     <ol type="i">
       <li>Virtual machine eth0 maps to WAN interface.</li>
       <li>Virtual machine eth1 maps to DMZ interface.</li>
@@ -141,8 +141,8 @@
 <br>
 
 <h2>Examples</h2>
-<h3 id="yaml">CG Edge VNF cloud-config user_data yaml</h3>
-<p>The generic CG Edge image has no settings for a cloud-config gateway deployment. However, <em>not providing any user data </em> will result in a VNF with a default configutaion and require the first-time-wizard to be ran manually.</p>
+<h3 id="yaml">CG Edge cloud-config user_data yaml</h3>
+<p>The generic CG Edge image has no settings for a cloud-config gateway deployment. However, <em>not providing any user data </em> will result in a VNF with a default configutaion and require the first-time-wizard to be run manually.</p>
 <p>
 
 
